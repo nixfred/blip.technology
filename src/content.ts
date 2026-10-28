@@ -50,14 +50,44 @@ export const INSTALL_NOTE_2 =
 export const AWAKE_NOTE =
   'After setup, the Mac must stay in a logged-in desktop session with Messages able to run, and it must not sleep. A sleeping Mac is an unreachable gateway: the widget dims and says so.'
 
-export const DEMO_ALT_APP =
-  'The Blip app window with demo data: a conversation list on the left, a thread with two demo photos, a reply and a read receipt on the right'
-export const DEMO_ALT_PANEL =
-  'The Blip bar popout with demo data: pinned conversations as tiles above the thread list'
-export const DEMO_ALT_PANEL_CONV =
-  'A conversation in the Blip bar popout with demo data: two demo photos from one message, a reply and a read receipt'
+export const SHOWCASE_ALT =
+  'The Blip app window with demo data on an Omarchy desktop, next to the line: iMessage. On Linux. For real.'
+export const SHOWCASE_CAPTION =
+  'Demo data. This is the project\'s own promo graphic, drawn with invented people and example.com addresses.'
+
+export const SCENES = [
+  {
+    file: 'blip-bar-popout.webp',
+    title: 'The bar popout',
+    alt: 'The Blip bar popout drawn with demo data: pinned conversation tiles above a list of threads, with blue dots on the ones that are unread, next to a code editor and a terminal',
+    caption: 'Pinned conversations as tiles, then your threads, with blue dots on the unread ones. The bar icon shows the count.',
+  },
+  {
+    file: 'blip-group-chat.webp',
+    title: 'Groups, photos and tapbacks',
+    alt: 'The Blip app window drawn with demo data: a group conversation called Trail Crew with a photo, two tapbacks, a blue reply and a Read receipt',
+    caption: 'A group thread with an inline photo, tapbacks, your reply in blue and the Read receipt underneath.',
+  },
+  {
+    file: 'blip-toast.webp',
+    title: 'Toasts from the people you choose',
+    alt: 'Two Blip desktop toasts drawn with demo data in the corner of a tiled Omarchy desktop, one from a person and one from a group',
+    caption: 'A toast fires only for senders on your allowlist. Click one and the panel opens on that conversation.',
+  },
+  {
+    file: 'blip-share-sheet.webp',
+    title: 'Links and the share sheet',
+    alt: 'A link card in a Blip conversation drawn with demo data, with a share sheet open on it: open in browser, copy link, a QR code and send to a device',
+    caption: 'A shared link shows as a card. Click it for a share sheet: open, copy, a QR code, or send it to another device.',
+  },
+] as const
 export const DEMO_CAPTION =
-  'Demo data. Every screenshot is the real client rendered against invented people. The project\'s demo script points the shipping code at a fake bridge, so nothing here is anyone\'s conversation. The numbers are in the 555-0100 range reserved for fiction.'
+  'Demo data. The four scenes are illustrations of the interface in the same style as the graphic above, drawn with invented people, example.com addresses and phone numbers in the 555-0100 range reserved for fiction. None of it is anyone\'s conversation.'
+
+export const CONTRIB_INTRO =
+  'Blip is built in the open. Everyone below has a merged pull request or commits in the repository, and each line says what they did, with links to the pull requests. This list is rebuilt from GitHub whenever the site is built.'
+export const QUOTES_INTRO =
+  'Public posts on X from people using Blip. The words are theirs, unedited. Where a post is longer, only the quoted part is shown and the link opens the whole post.'
 
 export const FEATURES = [
   {

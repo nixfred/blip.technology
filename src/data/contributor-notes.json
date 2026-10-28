@@ -1,0 +1,147 @@
+{
+  "people": {
+    "nixfred": {
+      "name": "Fred Nix",
+      "role": "Author and maintainer",
+      "writeup": "Wrote Blip and maintains it, reviewing and merging every contribution below. His own pull requests include #141, seven fixes from a whole project review, and #142, which lets Mark all read work while Blip says ALL CAUGHT UP."
+    },
+    "Fileri": {
+      "name": "Erik Fillipsveen",
+      "writeup": "The largest contributor by merged PRs. Made Blip usable from the keyboard with a bubble cursor and paging (#37, #39, #56), a draft kept per conversation (#41), and tapbacks from the message menu (#116, #117), and fixed how unsent messages, app cards and stickers show up (#32, #34, #68)."
+    },
+    "ianswope": {
+      "name": "Ian Swope",
+      "writeup": "Tightened toasts and read state: no toast for the open conversation (#76), no duplicates on extra monitors (#85), none for a message already read elsewhere (#95), and clicking one opens its conversation (#136). Also made the panel open faster (#88, #98), kept security codes out of the environment (#73) and fixed tapbacks on a macOS 27 gateway (#138)."
+    },
+    "jondkinney": {
+      "name": "Jon Kinney",
+      "writeup": "Built the read only contact review, with a duplicate scan, full source card details and vCard export (#24, #59, #60, #61). Also kept failed sends visible with a reason (#50), added Ctrl+1 to 9 pinned shortcuts (#53) and Retina scale media (#23)."
+    },
+    "jefehoser": {
+      "name": "Danny Cecil",
+      "writeup": "Polished the app window and composer. Long text wraps and copied files attach (#28), group photos are found and retried (#29), the app comes back on its last workspace without stealing focus (#48, #87), and Super+M no longer closes unrelated windows (#93)."
+    },
+    "zachwilke": {
+      "name": "Zach Wilke",
+      "writeup": "Worked on speed and attachments: instant sends and resolved duplicate Contacts cards (#43), a startup toll removed (#83), animated GIFs that stay animated (#81) and messages that carry several files (#82). Also moved timestamps across the bridge as UTC (#80)."
+    },
+    "damonjanis": {
+      "name": "Damon Janis",
+      "writeup": "Made read state reliable by syncing it through a durable, verified queue (#120), with fixes for the unread badge (#101) and for acknowledging read pushes only after they finish (#102). Added Mark as Unread and Mark as Read (#121) and Pin and Hide Alerts (#122) to the conversation menu."
+    },
+    "adamgamble": {
+      "name": "Adam Gamble",
+      "writeup": "Fixed early rendering and contact bugs: iPhone photos honour EXIF orientation (#9), bubble corners are square (#10), Family Sharing contact stores are ignored (#19) and pinned conversations survive shallow polls (#22). Also added the security code toast, with click to copy and a hotkey to type it (#35)."
+    },
+    "johanthoren": {
+      "name": "Johan Thorén",
+      "writeup": "Shaped the first app window: it fills its window like other Omarchy windows (#7), has live search and Super+M keys (#12) and jumps to a thread with 1 to 9 (#13)."
+    },
+    "joshhattan": {
+      "name": "joshhattan",
+      "writeup": "Fixed window placement so manual moves stick and the popout opens on the clicked screen (#109), and made security code autofill type the code when Gecko ignores set_text_contents (#110)."
+    },
+    "followbl": {
+      "name": "Brad Larson",
+      "writeup": "Kept Hyprland stable around displays that are off: no leader without a real screen (#113) and no floating window move when a workspace has no monitor (#128)."
+    },
+    "gjouret": {
+      "name": "Guido Jouret",
+      "writeup": "Fixed scrolling. Wheel and touchpad scroll now apply the delta 1 to 1 (#114), and mouse wheel notches glide through a smoothScroll setting (#115)."
+    },
+    "bbishdotdev": {
+      "name": "Brenden Bishop",
+      "writeup": "Added security code offers beside the focused field (#92)."
+    },
+    "badenpiland": {
+      "name": "Baden",
+      "writeup": "Added prefer_imessage=on in bridge.conf, which keeps mixed one to one chats on iMessage (#96)."
+    },
+    "Kb2uka": {
+      "name": "Kb2uka",
+      "writeup": "Added saving new contacts through the Mac bridge (#91)."
+    },
+    "Fail-Safe": {
+      "name": "Mark B",
+      "writeup": "Added allowlist notification controls to the conversation menus (#148), so toasts can be switched on or off per conversation without editing the file."
+    },
+    "joshuaswarren": {
+      "name": "Joshua Warren",
+      "writeup": "Added hiding of Spam and unknown sender chats through bridge.conf (#49)."
+    },
+    "jzetterman": {
+      "name": "John Zetterman",
+      "writeup": "Made Blip survive the host's ssh agent and the bar's PATH (#140)."
+    },
+    "bndnsmth": {
+      "name": "Brandon Smith",
+      "writeup": "Kept the active conversation selected in the sidebar (#134)."
+    },
+    "brightball": {
+      "name": "Barry Jones",
+      "writeup": "Fixed a unified SMS chat row turning an iMessage DM green (#147)."
+    },
+    "chadhs": {
+      "name": "Chad Stovern",
+      "writeup": "Fixed blip-setup mangling bridge.conf values that contain 2, 7 or x (#124)."
+    },
+    "cw228": {
+      "name": "cw228",
+      "writeup": "Added bin_dir= in bridge.conf so the Linux shims can live outside ~/bin (#100)."
+    },
+    "dreinecke": {
+      "name": "David Reinecke",
+      "writeup": "Routed per conversation spawns through a source id seam (#105). Also filed the report that contact photos never showed."
+    },
+    "ezachrisen": {
+      "name": "Espen Zachrisen",
+      "writeup": "Mirrored pinned conversations in Blip (#11)."
+    },
+    "GreyforgeLabs": {
+      "name": "Greyforge Labs",
+      "writeup": "Fixed search so sender aware self echoes are preserved (#126)."
+    },
+    "jaredmoody": {
+      "name": "Jared Moody",
+      "writeup": "Made blip-setup read SSH_CONNECTION in a fish safe way (#145)."
+    },
+    "tlehman": {
+      "name": "Tobi Lehman",
+      "writeup": "Added a mute list that hides spam conversations entirely (#27)."
+    },
+    "tolewis": {
+      "name": "Unhook Dev",
+      "writeup": "Fixed a bridge bug by keeping one chat row per group, so sends stop failing with error 1728 (#8)."
+    },
+    "jethrojones": {
+      "name": "Jethro Jones",
+      "writeup": "Made blip-check probe every Contacts source, not just the first (#2)."
+    },
+    "daveyb": {
+      "name": "David Benedic",
+      "writeup": "Landed two commits from a closed Windows tray PR (#131): imsg-send now waits 150 seconds for the Messages Automation prompt (sha:b440a49), and a test requires that wait (sha:1b55b40)."
+    }
+  },
+  "issues": [
+    {
+      "login": "jacobaross",
+      "name": "jacobaross",
+      "what": "a report on the Messages Automation prompt timing out, with the evidence attached"
+    },
+    {
+      "login": "znayer",
+      "name": "Zain Nayer",
+      "what": "a DM labelled with a raw phone number"
+    },
+    {
+      "login": "apexbenny",
+      "name": "Benny",
+      "what": "a compose box that clipped after five lines"
+    },
+    {
+      "login": "edmooredop",
+      "name": "edmooredop",
+      "what": "security code toasts for alphanumeric senders (#143)"
+    }
+  ]
+}

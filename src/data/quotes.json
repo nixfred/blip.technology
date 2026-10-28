@@ -1,0 +1,62 @@
+{
+  "note": "Public X posts about Blip, found with X search. Text is verbatim. Where a post is longer, only the quoted part is shown and the link opens the whole post.",
+  "checked": "2026-10-28",
+  "quotes": [
+    {
+      "id": "2108931929143734655",
+      "name": "1280 MHz",
+      "handle": "1280MHz",
+      "text": "Huge fan of Blip! Literally iMessage in @omarchy (does require a Mac on the network)",
+      "partial": false
+    },
+    {
+      "id": "2108730723704471953",
+      "name": "Ding",
+      "handle": "ding444",
+      "text": "This Omarchy plugin is bar far my most used and favorite",
+      "partial": false
+    },
+    {
+      "id": "2108951309806444900",
+      "name": "John",
+      "handle": "John4ZX4",
+      "text": "This has been super helpful to me. I can get 2FA codes without opening my phone, quickly check a text, etc. Thank you!",
+      "partial": false
+    },
+    {
+      "id": "2111856582145265887",
+      "name": "Joel Gaff, Jr.",
+      "handle": "joelga",
+      "text": "@NixFred for making Blip. Such a clutch tool on my Omarchy machine.",
+      "partial": true
+    },
+    {
+      "id": "2111612463594733744",
+      "name": "Spencer",
+      "handle": "spencer450",
+      "text": "Bought a 2018 MacBook Pro with a broken screen just so it could run Blip or BlueBubbles for my Omarchy installs",
+      "partial": false
+    },
+    {
+      "id": "2110532674754695487",
+      "name": "Jason Alexander",
+      "handle": "jasona",
+      "text": "there's a great project by @NixFred called blip that does proxying of iMessage to a client in Omarchy. Pair that with tailscale, and you're golden!",
+      "partial": true
+    },
+    {
+      "id": "2109721208220745892",
+      "name": "Michael C Hurley",
+      "handle": "MichaelH_rley",
+      "text": "finding blip was one of those click moments for me over the past few months, where it really sunk in that we can just fix everything. No one is holding us back, we’re not even holding ourselves back anymore.",
+      "partial": true
+    },
+    {
+      "id": "2109098639763403094",
+      "name": "Sour Ortanique",
+      "handle": "SourOrtanique",
+      "text": "Blip is awesome! Thank you so much.",
+      "partial": false
+    }
+  ]
+}

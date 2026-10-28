@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto'
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import * as C from './src/content.ts'
+import { AVATARS, avatarFile, loadContributors, type ContributorData, type Person } from './tools/contributors.ts'
 
 const ROOT = import.meta.dir
 const SRC = join(ROOT, 'src')
@@ -79,6 +80,112 @@ function emitAsset(name: string, bytes: Uint8Array) {
 }
 const A = (name: string) => assetMap.get(name) ?? (() => { throw new Error('missing asset ' + name) })()
 
+/* --------------------------------------------- contributors and quotes */
+type Note = { name: string; role?: string; writeup: string }
+type Notes = { people: Record<string, Note>; issues: { login: string; name: string; what: string }[] }
+type Quote = { id: string; name: string; handle: string; text: string; partial: boolean }
+const readJson = <T,>(f: string) => JSON.parse(readFileSync(join(SRC, 'data', f), 'utf8')) as T
+const GH = 'https://github.com'
+const noDash = (t: string) => t.replace(/\s*[\u2013\u2014]\s*/g, ', ')
+
+// "#12" becomes a pull request link and "sha:abc1234" a commit link
+function linkify(text: string) {
+  return esc(text)
+    .replace(/#(\d+)/g, (_, n) => `<a href="${SITE.repo}/pull/${n}">#${n}</a>`)
+    .replace(/sha:([0-9a-f]{7,40})/g, (_, h) => `<a href="${SITE.repo}/commit/${h}">${h.slice(0, 7)}</a>`)
+}
+const plain = (t: string) => t.replace(/sha:/g, '')
+
+function writeup(p: Person, notes: Notes) {
+  const n = notes.people[p.login]
+  if (n) return n.writeup
+  if (p.prs.length) return `Merged ${p.prs.slice(0, 2).map((r) => `#${r.n}, ${noDash(r.title)}`).join(' and ')}.`
+  return `Contributed ${p.commits} commit${p.commits === 1 ? '' : 's'}.`
+}
+
+function sortedPeople(d: ContributorData) {
+  return [...d.people].sort(
+    (a, b) => Number(b.login === 'nixfred') - Number(a.login === 'nixfred') || b.prs.length - a.prs.length || b.commits - a.commits || a.login.localeCompare(b.login),
+  )
+}
+
+function contributorsHtml(d: ContributorData, notes: Notes) {
+  const people = sortedPeople(d)
+  const cards = people
+    .map((p) => {
+      const n = notes.people[p.login]
+      const name = n?.name ?? p.login
+      const av = avatarFile(p.login)
+      const role = p.login === 'nixfred' ? 'Author and maintainer' : n?.role
+      const work = p.prs.length
+        ? `<a href="${GH}/${SITE.repoSlug}/pulls?q=${encodeURIComponent(`is:pr is:merged author:${p.login}`)}">${p.prs.length} merged PR${p.prs.length === 1 ? '' : 's'}</a>`
+        : `<a href="${GH}/${SITE.repoSlug}/commits?author=${encodeURIComponent(p.login)}">${p.commits} commit${p.commits === 1 ? '' : 's'}</a>`
+      return `<li class="person">
+<div class="who">
+${av ? `<img class="av" src="${A('av-' + av)}" width="48" height="48" loading="lazy" decoding="async" alt="">` : '<span class="av av-none" aria-hidden="true"></span>'}
+<div>
+<h3>${esc(name)}</h3>
+<p class="handle">@${esc(p.login)}${role ? ` · ${esc(role)}` : ''}</p>
+</div>
+</div>
+<p class="did">${linkify(writeup(p, notes))}</p>
+<p class="meta"><a href="${GH}/${encodeURIComponent(p.login)}">GitHub</a>${p.x ? `<a href="https://x.com/${encodeURIComponent(p.x)}">X @${esc(p.x)}</a>` : ''}${work}</p>
+</li>`
+    })
+    .join('\n')
+  const issues = notes.issues
+    .map((i) => `<a class="ul-link" href="${GH}/${encodeURIComponent(i.login)}">${esc(i.name)}</a> (${linkify(i.what)})`)
+    .join(', ')
+  return `<section class="sec" id="contributors">
+<div class="wrap">
+<h2>Contributors</h2>
+<p>${esc(C.CONTRIB_INTRO)}</p>
+<p class="count"><b>${people.length}</b> people: Fred Nix, who wrote Blip and maintains it, and ${people.length - 1} contributors.</p>
+<ul class="people">
+${cards}
+</ul>
+<p class="note">Also thanks to the people whose issues changed the code: ${issues}.</p>
+<p class="note">Pull requests and commits are from GitHub, ${longDate(d.fetched)}. Bots are left out. An X link appears only where the project's CONTRIBUTORS-X.md lists one.</p>
+</div>
+</section>
+`
+}
+
+function quotesHtml(q: { quotes: Quote[] }) {
+  const items = q.quotes
+    .map(
+      (x) => `<li>
+<figure class="quote">
+<blockquote><p>\u201c${x.partial ? '\u2026' : ''}${esc(x.text)}${x.partial && !/[.!?]$/.test(x.text) ? '\u2026' : ''}\u201d</p></blockquote>
+<figcaption>${esc(x.name)} · <a href="https://x.com/${encodeURIComponent(x.handle)}/status/${x.id}">@${esc(x.handle)} on X</a></figcaption>
+</figure>
+</li>`,
+    )
+    .join('\n')
+  return `<section class="sec" id="praise">
+<div class="wrap">
+<h2>What people say</h2>
+<p>${esc(C.QUOTES_INTRO)}</p>
+<ul class="quotes" tabindex="0" aria-label="Posts about Blip, swipe to see more">
+${items}
+</ul>
+</div>
+</section>
+`
+}
+
+function contributorsMd(d: ContributorData, notes: Notes) {
+  const people = sortedPeople(d)
+  const abs = (t: string) =>
+    plain(t).replace(/#(\d+)/g, (_, n) => `[#${n}](${SITE.repo}/pull/${n})`)
+  return people
+    .map((p) => {
+      const n = notes.people[p.login]
+      return `- **${n?.name ?? p.login}** ([@${p.login}](${GH}/${p.login})${p.x ? `, [X @${p.x}](https://x.com/${p.x})` : ''}): ${abs(writeup(p, notes))}`
+    })
+    .join('\n')
+}
+
 /* ----------------------------------------------------------------- html */
 function head(o: { title: string; desc: string; path: string; index: boolean }) {
   const url = SITE.origin + o.path
@@ -145,7 +252,7 @@ function installHtml() {
   }).join('\n')
 }
 
-function indexHtml(s: Stats) {
+function indexHtml(s: Stats, contrib: ContributorData, notes: Notes, quotes: { quotes: Quote[] }) {
   const date = longDate(s.fetched)
   const nf = new Intl.NumberFormat('en-US')
   const cards = C.FEATURES.map(
@@ -154,6 +261,14 @@ function indexHtml(s: Stats) {
 <h3>${esc(f.title)}</h3>
 <p class="long">${esc(f.body)}</p>
 <p class="short">${esc(f.short)}</p>
+</li>`,
+  ).join('\n')
+  const scenes = C.SCENES.map(
+    (c) => `<li>
+<figure class="shot">
+<div class="frame"><img src="${A(c.file)}" width="2000" height="1250" loading="lazy" decoding="async" alt="${esc(c.alt)}"></div>
+<figcaption><strong>${esc(c.title)}.</strong> ${esc(c.caption)}</figcaption>
+</figure>
 </li>`,
   ).join('\n')
   return (
@@ -171,6 +286,12 @@ ${header}<main id="main">
 <a class="btn btn-ghost" href="${SITE.home}">Back to nixfred.com</a>
 <a class="link-quiet" href="#install">Install</a>
 </div>
+</div>
+<div class="wrap hero-shot">
+<figure class="shot">
+<div class="frame"><img src="${A('blip-showcase.webp')}" width="1636" height="1149" fetchpriority="high" decoding="async" alt="${esc(C.SHOWCASE_ALT)}"></div>
+<figcaption><strong>Demo data.</strong> ${esc(C.SHOWCASE_CAPTION.replace(/^Demo data\. /, ''))}</figcaption>
+</figure>
 </div>
 </section>
 
@@ -200,16 +321,10 @@ ${C.REQUIREMENTS.map((r) => `<li>${esc(r)}</li>`).join('\n')}
 <section class="sec" id="demo">
 <div class="wrap">
 <h2>What it looks like</h2>
-<figure class="shot">
-<div class="frame">
-<img src="${A('blip-app.png')}" width="1120" height="760" loading="lazy" decoding="async" alt="${esc(C.DEMO_ALT_APP)}">
-</div>
-<div class="pair">
-<div class="frame"><img src="${A('blip-panel.png')}" width="560" height="760" loading="lazy" decoding="async" alt="${esc(C.DEMO_ALT_PANEL)}"></div>
-<div class="frame"><img src="${A('blip-panel-conversation.png')}" width="560" height="760" loading="lazy" decoding="async" alt="${esc(C.DEMO_ALT_PANEL_CONV)}"></div>
-</div>
-<figcaption><strong>Demo data.</strong> ${esc(C.DEMO_CAPTION.replace(/^Demo data\. /, ''))}</figcaption>
-</figure>
+<ul class="scenes">
+${scenes}
+</ul>
+<p class="note">${esc(C.DEMO_CAPTION)}</p>
 </div>
 </section>
 
@@ -223,16 +338,18 @@ ${cards}
 </div>
 </section>
 
+${quotesHtml(quotes)}
+${contributorsHtml(contrib, notes)}
 <section class="sec" id="stats">
 <div class="wrap">
 <h2>On GitHub</h2>
 <ul class="stats">
 <li><b>${nf.format(s.stars)}</b> stars</li>
 <li><b>${nf.format(s.forks)}</b> forks</li>
-<li><b>${nf.format(s.contributors)}</b> contributors</li>
+<li><b>${nf.format(contrib.people.length)}</b> contributors</li>
 <li>MIT license</li>
 </ul>
-<p class="note">Star, fork and contributor counts are from GitHub, ${date}.</p>
+<p class="note">Star and fork counts are from GitHub, ${date}. Contributors are the people listed above.</p>
 </div>
 </section>
 
@@ -272,7 +389,7 @@ ${footer}</body>
 }
 
 /* ------------------------------------------------------------- markdown */
-function indexMd(s: Stats) {
+function indexMd(s: Stats, contrib: ContributorData, notes: Notes, quotes: { quotes: Quote[] }) {
   return `# Blip
 
 ${C.TAGLINE}
@@ -307,11 +424,11 @@ ${C.AWAKE_NOTE}
 
 ## What it looks like
 
-![${C.DEMO_ALT_APP}](${SITE.origin}${A('blip-app.png')})
+![${C.SHOWCASE_ALT}](${SITE.origin}${A('blip-showcase.webp')})
 
-![${C.DEMO_ALT_PANEL}](${SITE.origin}${A('blip-panel.png')})
+${C.SHOWCASE_CAPTION}
 
-![${C.DEMO_ALT_PANEL_CONV}](${SITE.origin}${A('blip-panel-conversation.png')})
+${C.SCENES.map((c) => `![${c.alt}](${SITE.origin}${A(c.file)})\n\n**${c.title}.** ${c.caption}`).join('\n\n')}
 
 ${C.DEMO_CAPTION}
 
@@ -321,11 +438,29 @@ ${C.FEATURES.map((f) => `### ${f.title}\n\n${f.body}`).join('\n\n')}
 
 ${C.CANT_DO}
 
+## What people say
+
+${C.QUOTES_INTRO}
+
+${quotes.quotes.map((x) => `> ${x.partial ? '…' : ''}${x.text}${x.partial && !/[.!?]$/.test(x.text) ? '…' : ''}\n>\n> ${x.name}, [@${x.handle} on X](https://x.com/${x.handle}/status/${x.id})`).join('\n\n')}
+
+## Contributors
+
+${C.CONTRIB_INTRO}
+
+${contrib.people.length} people: Fred Nix, who wrote Blip and maintains it, and ${contrib.people.length - 1} contributors.
+
+${contributorsMd(contrib, notes)}
+
+Also thanks to the people whose issues changed the code: ${notes.issues.map((i) => `[${i.name}](${GH}/${i.login}) (${plain(i.what)})`).join(', ')}.
+
+Pull requests and commits are from GitHub, ${longDate(contrib.fetched)}. Bots are left out.
+
 ## On GitHub
 
-${s.stars} stars, ${s.forks} forks, ${s.contributors} contributors. MIT license.
+${s.stars} stars, ${s.forks} forks, ${contrib.people.length} contributors. MIT license.
 
-Star, fork and contributor counts are from GitHub, ${longDate(s.fetched)}.
+Star and fork counts are from GitHub, ${longDate(s.fetched)}. Contributors are the people listed above.
 
 ## Part of nixfred.com
 
@@ -387,6 +522,9 @@ function renderSkills() {
 const statsOnly = process.argv.includes('--stats-only')
 const stats = await loadStats()
 if (statsOnly) process.exit(0)
+const contrib = await loadContributors(SITE.repoSlug, nyDate())
+const notes = readJson<Notes>('contributor-notes.json')
+const quotes = readJson<{ quotes: Quote[] }>('quotes.json')
 await checkReadme()
 
 rmSync(DIST, { recursive: true, force: true })
@@ -397,10 +535,11 @@ mkdirSync(join(DIST, 'assets'), { recursive: true })
 
 for (const f of ['site.css', 'site.js']) emitAsset(f, readFileSync(join(SRC, f)))
 for (const f of readdirSync(PUB_ASSETS)) emitAsset(f, readFileSync(join(PUB_ASSETS, f)))
+for (const f of readdirSync(AVATARS)) emitAsset('av-' + f, readFileSync(join(AVATARS, f)))
 
-writeFileSync(join(DIST, 'index.html'), indexHtml(stats))
+writeFileSync(join(DIST, 'index.html'), indexHtml(stats, contrib, notes, quotes))
 writeFileSync(join(DIST, '404.html'), notFoundHtml())
-writeFileSync(join(DIST, 'index.md'), indexMd(stats))
+writeFileSync(join(DIST, 'index.md'), indexMd(stats, contrib, notes, quotes))
 writeFileSync(
   join(DIST, 'robots.txt'),
   `User-agent: *\nContent-Signal: ai-train=no, search=yes, ai-input=yes\nAllow: /\n\nSitemap: ${SITE.origin}/sitemap.xml\n`,
